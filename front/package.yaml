@@ -37,6 +37,7 @@ dependencies:
 - data-has
 - mongoDB
 - AesonBson
+- wai-logger
 
 default-extensions:
 - QuasiQuotes

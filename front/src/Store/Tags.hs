@@ -17,6 +17,7 @@ import Data.Aeson
 import qualified Data.Text as T
 import Data.List.Extra (enumerate)
 import Control.Arrow
+import Data.Maybe
 
 
 data TagStore = TagStore {
@@ -56,14 +57,17 @@ insertStore :: (MonadIO m, ToJSON k, ToJSON v) => Mongo.Pipe -> Store k v -> k -
 insertStore pipe Store{..} key value = writeToPipe pipe $ do
   let slice = ["$push" =: [arrayLabel =: [
           "$each" =: [toBSON value]
-        , "$slice" =: maxValuesPerKey
+        , "$slice" =: -maxValuesPerKey
         ]]]
   Mongo.upsert (keySelection key collection) slice
 
 getStore :: (MonadIO m, ToJSON k, FromJSON v) => Mongo.Pipe -> Store k v -> k -> m [v]
 getStore pipe Store{..} key = readFromPipe pipe $ do
-  cursor <- Mongo.find $ keySelection key collection
-  documents <- Mongo.rest cursor
+  document'm <- Mongo.findOne $ keySelection key collection
+  let documents = case document'm of
+        Nothing -> []
+        Just doc -> fromMaybe (error $ "Expected " <> show arrayLabel <> " in document.") $
+          Mongo.lookup arrayLabel doc
   pure $ map (fromBSON . Mongo.Doc) documents
 
 keySelection :: (Mongo.Select aQueryOrSelection, ToJSON k) => k -> Mongo.Collection -> aQueryOrSelection
@@ -79,7 +83,7 @@ readFromPipe :: MonadIO m => Mongo.Pipe -> Mongo.Action m a -> m a
 readFromPipe pipe = Mongo.access pipe Mongo.ReadStaleOk databaseName
 
 writeToPipe :: MonadIO m => Mongo.Pipe -> Mongo.Action m a -> m a
-writeToPipe pipe = Mongo.access pipe Mongo.master databaseName
+writeToPipe pipe = Mongo.access pipe Mongo.UnconfirmedWrites databaseName
 
 databaseName :: Mongo.Database
 databaseName = "pds"

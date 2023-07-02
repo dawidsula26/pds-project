@@ -35,9 +35,9 @@ newtype ReqUserTags = ReqUserTags UserTag
 type APIUserProfiles =
      "user_profiles"
   :> CaptureAll "segments" String
-  :> QueryParam' '[Required] "time_range" String
+  :> QueryParam' '[Required] "time_range" TagTimeRange
   :> QueryParam "limit" Int
-  :> Get '[JSON] RespUserProfiles
+  :> Post '[JSON] RespUserProfiles
 
 data RespUserProfiles = RespUserProfiles {
     cookie :: Cookie

@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Types.UserTag (
   UserTag (..)
 , TagTime
@@ -14,12 +15,16 @@ module Types.UserTag (
 , BrandId
 , CategoryId
 , Price
+
+, TagTimeRange (..)
 ) where
 
 import Data.Time
 import Data.Aeson
 import GHC.Generics
 import Data.Char (toUpper)
+import Servant
+import qualified Data.Text as T
 
 
 data UserTag = UserTag {
@@ -34,7 +39,7 @@ data UserTag = UserTag {
 
 
 newtype TagTime = TagTime UTCTime
-  deriving newtype (Show, FromJSON, ToJSON)
+  deriving newtype (Show, Eq, Ord, FromJSON, ToJSON, FromHttpApiData)
 
 
 newtype Cookie = Cookie String
@@ -94,3 +99,17 @@ uppercaseSumTypeOptions :: Options
 uppercaseSumTypeOptions = defaultOptions {
     constructorTagModifier = map toUpper
   }
+
+
+data TagTimeRange = TagTimeRange {
+  beginInclusive :: TagTime
+, endExclusive :: TagTime
+} deriving (Show)
+
+instance FromHttpApiData TagTimeRange where
+  parseUrlPiece txt = case T.splitOn "_" txt of
+    [beginInclusive', endExclusive'] -> do
+      beginInclusive <- parseUrlPiece beginInclusive'
+      endExclusive <- parseUrlPiece endExclusive'
+      pure TagTimeRange{..}
+    _ -> throwError "Illegal number of \"_\" in input."
