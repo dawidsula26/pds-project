@@ -1,0 +1,60 @@
+services:
+  front:
+    image: pds-front
+    ports:
+      - "8080:8080"
+    deploy:
+      # replicas: 2
+
+  # Mongo
+  # Mongo-config
+  mongo-config:
+    image: mongo
+    command: mongod --port 27017 --configsvr --replSet rs-config --bind_ip_all
+    deploy:
+      replicas: 3
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+
+  mongo-config-init:
+    image: pds-scripts-mongo
+    entrypoint: sh /config-init.sh
+    depends_on:
+      mongo-config:
+        condition: service_healthy
+
+  # Mongo-shard-a
+  mongo-shard-a:
+    image: mongo
+    command: mongod --port 27017 --shardsvr --replSet rs-shard-a --bind_ip_all
+    deploy:
+      replicas: 3
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+
+  mongo-shard-a-init:
+    image: pds-scripts-mongo
+    entrypoint: sh /shard-a-init.sh
+    depends_on:
+      mongo-shard-a:
+        condition: service_healthy
+
+  # Mongo-router
+  mongo-router:
+    image: mongo
+    command: mongos --configdb rs-config/pds-mongo-config-1:27017,pds-mongo-config-2:27017,pds-mongo-config-3:27017 --bind_ip_all
+    deploy:
+      replicas: 3
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+
+  mongo-router-init:
+    image: pds-scripts-mongo
+    entrypoint: sh /router-init.sh
+    depends_on:
+      mongo-config-init:
+        condition: service_completed_successfully
+      mongo-shard-a-init:
+        condition: service_completed_successfully
+      mongo-router:
+        condition: service_healthy

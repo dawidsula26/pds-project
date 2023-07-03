@@ -1,0 +1,4 @@
+FROM mongo
+COPY . /
+WORKDIR /
+ENTRYPOINT [ ]
