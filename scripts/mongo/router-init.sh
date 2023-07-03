@@ -1,1 +1,1 @@
-mongosh "pds-mongo-shard-a-1:27017" < shard-a-init.js
+mongosh "pds-mongo-router-1:27017" < router-init.js

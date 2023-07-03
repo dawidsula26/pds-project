@@ -39,6 +39,38 @@ services:
       mongo-shard-a:
         condition: service_healthy
 
+  # Mongo-shard-b
+  mongo-shard-b:
+    image: mongo
+    command: mongod --port 27017 --shardsvr --replSet rs-shard-b --bind_ip_all
+    deploy:
+      replicas: 3
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+
+  mongo-shard-b-init:
+    image: pds-scripts-mongo
+    entrypoint: sh /shard-b-init.sh
+    depends_on:
+      mongo-shard-b:
+        condition: service_healthy
+
+  # Mongo-shard-c
+  mongo-shard-c:
+    image: mongo
+    command: mongod --port 27017 --shardsvr --replSet rs-shard-c --bind_ip_all
+    deploy:
+      replicas: 3
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+
+  mongo-shard-c-init:
+    image: pds-scripts-mongo
+    entrypoint: sh /shard-c-init.sh
+    depends_on:
+      mongo-shard-c:
+        condition: service_healthy
+
   # Mongo-router
   mongo-router:
     image: mongo
@@ -55,6 +87,10 @@ services:
       mongo-config-init:
         condition: service_completed_successfully
       mongo-shard-a-init:
+        condition: service_completed_successfully
+      mongo-shard-b-init:
+        condition: service_completed_successfully
+      mongo-shard-c-init:
         condition: service_completed_successfully
       mongo-router:
         condition: service_healthy
