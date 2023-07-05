@@ -27,7 +27,7 @@ data TagStore = TagStore {
 
 newTagStore :: IO TagStore
 newTagStore = do
-  pipe <- Mongo.connect $ Mongo.Host "mongo" $ Mongo.PortNumber 27017
+  pipe <- Mongo.connect $ Mongo.Host "mongo-router" $ Mongo.PortNumber 27017
   let makeStore act = Store "tags" (T.toLower $ T.pack $ show act)
       actions = enumerate
       actionsWithStores = map (id &&& makeStore) actions

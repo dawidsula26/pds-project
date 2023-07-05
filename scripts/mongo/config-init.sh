@@ -1,1 +1,1 @@
-mongosh "pds-mongo-config-1:27017" < config-init.js
+mongosh "pds_mongo-config.1:27017" < config-init.js
