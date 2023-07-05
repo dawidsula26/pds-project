@@ -29,7 +29,7 @@ type APIUserTags =
   :> PostNoContent
 
 newtype ReqUserTags = ReqUserTags UserTag
-  deriving newtype (FromJSON, ToJSON)
+  deriving newtype (Show, Eq, FromJSON, ToJSON)
 
 
 type APIUserProfiles =
@@ -37,6 +37,7 @@ type APIUserProfiles =
   :> CaptureAll "segments" String
   :> QueryParam' '[Required] "time_range" TagTimeRange
   :> QueryParam "limit" Int
+  :> ReqBody '[JSON] RespUserProfiles
   :> Post '[JSON] RespUserProfiles
 
 data RespUserProfiles = RespUserProfiles {
@@ -44,4 +45,4 @@ data RespUserProfiles = RespUserProfiles {
   , views :: [UserTag]
   , buys :: [UserTag]
   }
-  deriving (Generic, FromJSON, ToJSON)
+  deriving (Show, Eq, Generic, FromJSON, ToJSON)

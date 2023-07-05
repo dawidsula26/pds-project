@@ -89,4 +89,4 @@ databaseName :: Mongo.Database
 databaseName = "pds"
 
 maxValuesPerKey :: Int
-maxValuesPerKey = 10
+maxValuesPerKey = 250

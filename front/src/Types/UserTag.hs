@@ -3,7 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Types.UserTag (
   UserTag (..)
-, TagTime
+, TagTime (..)
 , Cookie (..)
 , Country
 , Device
@@ -35,7 +35,7 @@ data UserTag = UserTag {
 , action :: Action
 , origin :: Origin
 , product_info :: ProductInfo
-} deriving (Show, Generic, FromJSON, ToJSON)
+} deriving (Show, Eq, Generic, FromJSON, ToJSON)
 
 
 newtype TagTime = TagTime UTCTime
@@ -47,11 +47,11 @@ newtype Cookie = Cookie String
 
 
 newtype Country = Country String
-  deriving newtype (Show, FromJSON, ToJSON)
+  deriving newtype (Show, Eq, FromJSON, ToJSON)
 
 
 data Device = PC | MOBILE | TV
-  deriving (Show, Generic, Bounded, Enum)
+  deriving (Show, Eq, Generic, Bounded, Enum)
 
 instance FromJSON Device where
   parseJSON = genericParseJSON uppercaseSumTypeOptions
@@ -71,7 +71,7 @@ instance ToJSON Action where
 
 
 newtype Origin = Origin String
-  deriving newtype (Show, FromJSON, ToJSON)
+  deriving newtype (Show, Eq, FromJSON, ToJSON)
 
 
 data ProductInfo = ProductInfo {
@@ -79,20 +79,20 @@ data ProductInfo = ProductInfo {
 , brand_id :: BrandId
 , category_id :: CategoryId
 , price :: Price
-} deriving (Show, Generic, FromJSON, ToJSON)
+} deriving (Show, Eq, Generic, FromJSON, ToJSON)
 
 
-newtype ProductId = ProductId String
-  deriving newtype (Show, FromJSON, ToJSON)
+newtype ProductId = ProductId Int
+  deriving newtype (Show, Eq, FromJSON, ToJSON)
 
 newtype BrandId = BrandId String
-  deriving newtype (Show, FromJSON, ToJSON)
+  deriving newtype (Show, Eq, FromJSON, ToJSON)
 
 newtype CategoryId = CategoryId String
-  deriving newtype (Show, FromJSON, ToJSON)
+  deriving newtype (Show, Eq, FromJSON, ToJSON)
 
 newtype Price = Price Int
-  deriving newtype (Show, FromJSON, ToJSON)
+  deriving newtype (Show, Eq, FromJSON, ToJSON)
 
 
 uppercaseSumTypeOptions :: Options
@@ -102,8 +102,8 @@ uppercaseSumTypeOptions = defaultOptions {
 
 
 data TagTimeRange = TagTimeRange {
-  beginInclusive :: TagTime
-, endExclusive :: TagTime
+  beginInclusive :: LocalTime
+, endExclusive :: LocalTime
 } deriving (Show)
 
 instance FromHttpApiData TagTimeRange where
