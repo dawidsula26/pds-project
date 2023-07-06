@@ -34,7 +34,7 @@ services:
     command: mongod --port 27017 --shardsvr --replSet rs-shard-a --bind_ip_all
     hostname: "{{.Service.Name}}.{{.Task.Slot}}"
     deploy:
-      replicas: 3
+      replicas: 2
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
 
@@ -51,7 +51,7 @@ services:
     command: mongod --port 27017 --shardsvr --replSet rs-shard-b --bind_ip_all
     hostname: "{{.Service.Name}}.{{.Task.Slot}}"
     deploy:
-      replicas: 3
+      replicas: 2
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
 
@@ -68,7 +68,7 @@ services:
     command: mongod --port 27017 --shardsvr --replSet rs-shard-c --bind_ip_all
     hostname: "{{.Service.Name}}.{{.Task.Slot}}"
     deploy:
-      replicas: 3
+      replicas: 2
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
 
