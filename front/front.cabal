@@ -25,10 +25,8 @@ source-repository head
 
 library
   exposed-modules:
-      Env.Monad
       Lib
       Store.Tags
-      Types.Api
       Types.UserTag
   other-modules:
       Paths_front

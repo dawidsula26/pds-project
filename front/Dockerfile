@@ -1,13 +1,3 @@
-# FROM haskell
-
-# RUN mkdir /opt/build
-# COPY . /opt/build
-# WORKDIR /opt/build
-# RUN stack install
-# EXPOSE 8080
-# ENTRYPOINT ["front-exe"]
-
-
 # Loosely based on https://www.fpcomplete.com/blog/2017/12/building-haskell-apps-with-docker
 FROM haskell as dependencies
 RUN mkdir /opt/build
