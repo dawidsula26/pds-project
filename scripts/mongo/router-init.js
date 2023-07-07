@@ -10,6 +10,6 @@ sh.shardCollection(
 )
 
 sh.shardCollection(
-  "pds.view",
+  "pds.buy",
   { _id: "hashed" }
 )
