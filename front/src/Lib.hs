@@ -16,8 +16,6 @@ import Store.Tags
 import Data.Maybe
 import Control.Exception
 import Data.Time
-import Control.Monad (when)
-import Control.Monad.IO.Class (MonadIO(..))
 import Data.List (sortOn)
 import Data.Ord (Down(..))
 
@@ -46,17 +44,11 @@ serverUserTags :: ReqUserTags -> Env NoContent
 serverUserTags (ReqUserTags tag) = insertTag tag >> return NoContent
 
 serverUserProfiles :: [String] -> TagTimeRange -> Maybe Int -> RespUserProfiles -> Env RespUserProfiles
-serverUserProfiles segments timeRange limit'm expected = do
+serverUserProfiles segments timeRange limit'm _ = do
   cookie <- case segments of
     [segment] -> pure $ Cookie segment
     _ -> fail "Illegal number of segments"
-  resp <- logicUserProfiles cookie timeRange limit'm
-  when (resp /= expected) $ liftIO $ do
-    putStrLn "Response:"
-    print resp
-    putStrLn "Expected:"
-    print expected
-  pure resp
+  logicUserProfiles cookie timeRange limit'm
 
 logicUserProfiles :: Cookie -> TagTimeRange -> Maybe Int -> Env RespUserProfiles
 logicUserProfiles cookie TagTimeRange{..} limit'm = do

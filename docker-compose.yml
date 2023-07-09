@@ -1,4 +1,4 @@
-version: "3"
+version: "3.8"
 
 services:
   front:
@@ -9,6 +9,9 @@ services:
       replicas: 4
       restart_policy:
         condition: any
+      placement:
+        constraints: [node.labels.node-front == true ]
+        max_replicas_per_node: 1
 
   # Mongo
   # Mongo-config
@@ -18,6 +21,8 @@ services:
     hostname: "{{.Service.Name}}.{{.Task.Slot}}"
     deploy:
       replicas: 3
+      placement:
+        max_replicas_per_node: 1
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
 
@@ -35,6 +40,9 @@ services:
     hostname: "{{.Service.Name}}.{{.Task.Slot}}"
     deploy:
       replicas: 2
+      placement:
+        constraints: [node.labels.node-shard-a == true ]
+        max_replicas_per_node: 1
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
 
@@ -52,6 +60,9 @@ services:
     hostname: "{{.Service.Name}}.{{.Task.Slot}}"
     deploy:
       replicas: 2
+      placement:
+        constraints: [node.labels.node-shard-b == true ]
+        max_replicas_per_node: 1
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
 
@@ -62,30 +73,16 @@ services:
       restart_policy:
         condition: on-failure
 
-  # Mongo-shard-c
-  mongo-shard-c:
-    image: mongo
-    command: mongod --port 27017 --shardsvr --replSet rs-shard-c --bind_ip_all
-    hostname: "{{.Service.Name}}.{{.Task.Slot}}"
-    deploy:
-      replicas: 2
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-
-  mongo-shard-c-init:
-    image: st116vm101.rtb-lab.pl:443/pds-scripts-mongo
-    entrypoint: sh /shard-c-init.sh
-    deploy:
-      restart_policy:
-        condition: on-failure
-
   # Mongo-router
   mongo-router:
     image: mongo
     command: mongos --configdb rs-config/pds_mongo-config.1:27017,pds_mongo-config.2:27017,pds_mongo-config.3:27017 --bind_ip_all
     hostname: "{{.Service.Name}}.{{.Task.Slot}}"
     deploy:
-      replicas: 3
+      replicas: 2
+      placement:
+        constraints: [node.labels.node-router == true ]
+        max_replicas_per_node: 1
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
 
